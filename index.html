@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeerHub - Structured & Verified Skill Exchange</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Supabase client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .active-tab {
+            border-bottom: 2px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-brand-500 selection:text-white min-h-screen flex flex-col justify-between">
+
+    <!-- TOP NAVIGATION BAR -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- BRAND LOGO -->
+            <a href="#" onclick="switchView('landing')" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="2"/>
+                        <path d="M7 17V7M17 17V7M7 12H17" stroke="currentColor" stroke-width="2.5"/>
+                        <circle cx="12" cy="7" r="1.5" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight text-slate-900">Peer<span class="text-brand-600">Hub</span></span>
+                    <span class="block text-[10px] uppercase tracking-widest font-semibold text-slate-400">Knowledge Exchange</span>
+                </div>
+            </a>
+
+            <!-- NAVIGATION CONTROLS -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <button onclick="switchView('landing')" id="btnNavLanding" class="px-4 py-2 text-sm font-bold text-brand-600 border-b-2 border-brand-600 transition-all">
+                    <i class="fa-solid fa-house mr-1.5"></i> Home Page
+                </button>
+                <button onclick="switchView('dashboard')" id="btnNavDashboard" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold px-4 py-2 rounded-xl transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </button>
+                
+                <!-- USER AUTH STATUS BUTTON -->
+                <div id="authNavContainer" class="border-l border-slate-200 pl-2 sm:pl-4">
+                    <button id="btnAuth" onclick="openAuthModal('login')" class="bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-md shadow-brand-600/20 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> <span id="authBtnText">Log In</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN VIEW WRAPPER -->
+    <main id="mainContainer" class="flex-grow">
+
+        <!-- ================= LANDING PAGE ================= -->
+        <section id="viewLanding" class="block">
+            <!-- HERO SECTION -->
+            <div class="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
+                <div class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.indigo.100),transparent)]"></div>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="grid lg:grid-cols-12 gap-12 items-center">
+                        
+                        <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 bg-brand-50 border border-brand-100 text-brand-700 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase">
+                                <span class="w-2 h-2 rounded-full bg-brand-600 animate-pulse"></span>
+                                Month 1 Pilot Cohort (+18)
+                            </div>
+                            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                                Exchange skills with total <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-500">security and reliability</span>.
+                            </h1>
+                            <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0">
+                                Say goodbye to passive learning and missed sessions. PeerHub brings together motivated students and lifelong learners through automated commitment tracking and rigorous identity verification.
+                            </p>
+                            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                                <button onclick="switchView('dashboard')" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 text-white font-semibold px-8 py-4 rounded-xl shadow-xl shadow-brand-600/25 transition-all text-center">
+                                    Access Platform <i class="fa-solid fa-arrow-right ml-2"></i>
+                                </button>
+                                <a href="#trust-pillars" class="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold px-8 py-4 rounded-xl shadow-sm transition-all text-center">
+                                    How it works
+                                </a>
+                            </div>
+
+                            <!-- TRUST STATS -->
+                            <div class="grid grid-cols-3 gap-4 pt-8 border-t border-slate-200 text-center">
+                                <div>
+                                    <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">100%</div>
+                                    <div class="text-xs text-slate-500">Verified Members</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">0%</div>
+                                    <div class="text-xs text-slate-500">Unexplained No-Shows</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">Month 1</div>
+                                    <div class="text-xs text-slate-500">Pilot Launch</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LANDING INTERACTIVE CARD -->
+                        <div class="lg:col-span-5">
+                            <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-slate-100 relative">
+                                <div class="absolute -top-3 -right-3 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1.5">
+                                    <i class="fa-solid fa-shield-check"></i> Verified Status
+                                </div>
+                                <div class="flex items-center gap-4 mb-6">
+                                    <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-brand-600 flex items-center justify-center font-bold text-xl">
+                                        JD
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg text-slate-900">Julian Dupont</h3>
+                                        <p class="text-xs text-slate-500">Tech Student • Pilot Member</p>
+                                        <div class="flex items-center gap-1 mt-1 text-amber-500 text-xs font-semibold">
+                                            <i class="fa-solid fa-star"></i> 4.95 / 5.0 (28 sessions)
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-6">
+                                    <div class="flex justify-between text-xs font-semibold text-slate-600">
+                                        <span>Reliability Score</span>
+                                        <span class="text-emerald-600">98% Excellent</span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-emerald-500 h-full rounded-full" style="width: 98%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2 text-xs text-slate-600">
+                                    <div class="flex items-center justify-between p-2 rounded-lg bg-emerald-50 text-emerald-800">
+                                        <span><i class="fa-solid fa-check-circle mr-1"></i> Monthly Onboarding Completed</span>
+                                        <span class="font-bold">Oct 2026</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-2 rounded-lg bg-brand-50 text-brand-800">
+                                        <span><i class="fa-solid fa-award mr-1"></i> React Developer Badge</span>
+                                        <span class="font-bold">Level 2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRUST PILLARS SECTION -->
+            <div id="trust-pillars" class="py-16 bg-white border-y border-slate-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-3xl mx-auto mb-12">
+                        <h2 class="text-xs font-bold uppercase tracking-widest text-brand-600 mb-2">Structure & Accountability</h2>
+                        <h3 class="text-3xl font-extrabold text-slate-900">How PeerHub Guarantees Reliability</h3>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="p-8 rounded-2xl bg-slate-50 border border-slate-200 hover:shadow-md transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xl mb-6 shadow-md shadow-brand-500/20">
+                                <i class="fa-solid fa-user-shield"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-slate-900 mb-2">Monthly Onboarding</h4>
+                            <p class="text-sm text-slate-600 leading-relaxed">
+                                Every member undergoes an initial safety and orientation interview to verify identity and maintain cohort motivation.
+                            </p>
+                        </div>
+
+                        <div class="p-8 rounded-2xl bg-slate-50 border border-slate-200 hover:shadow-md transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl mb-6 shadow-md shadow-indigo-500/20">
+                                <i class="fa-solid fa-certificate"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-slate-900 mb-2">Skill-Level Badges</h4>
+                            <p class="text-sm text-slate-600 leading-relaxed">
+                                Transparent peer skill assessments to ensure balanced, mutually beneficial learning partnerships.
+                            </p>
+                        </div>
+
+                        <div class="p-8 rounded-2xl bg-slate-50 border border-slate-200 hover:shadow-md transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xl mb-6 shadow-md shadow-slate-900/20">
+                                <i class="fa-solid fa-calendar-check"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-slate-900 mb-2">Absence Management</h4>
+                            <p class="text-sm text-slate-600 leading-relaxed">
+                                Log unforeseen events officially inside the platform to protect your reliability score fairly.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= DASHBOARD ================= -->
+        <section id="viewDashboard" class="hidden pb-16">
+            
+            <!-- DASHBOARD HEADER -->
+            <div class="bg-white border-b border-slate-200 py-6 mb-8">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                            <i class="fa-solid fa-shield-halved"></i> Verified Profile • Pilot Cohort #1
+                        </div>
+                        <h1 id="dashboardTitle" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-2">Your Dashboard</h1>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button onclick="openModal('session')" class="bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Propose Session
+                        </button>
+                        <button onclick="openModal('absence')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold px-4 py-2.5 rounded-xl border border-slate-200 transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-minus"></i> Log Absence
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- METRICS GRID -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Engagement Score</span>
+                            <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-star"></i>
+                            </span>
+                        </div>
+                        <div class="text-3xl font-extrabold text-slate-900">96%</div>
+                        <p class="text-xs text-emerald-600 font-medium mt-1"><i class="fa-solid fa-check"></i> Exemplary Punctuality</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Completed Sessions</span>
+                            <span class="w-8 h-8 rounded-lg bg-indigo-50 text-brand-600 flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-handshake"></i>
+                            </span>
+                        </div>
+                        <div id="metricHours" class="text-3xl font-extrabold text-slate-900">0 hrs</div>
+                        <p id="metricSplit" class="text-xs text-slate-500 mt-1">0h Mentor / 0h Learner</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Valid Absences</span>
+                            <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </span>
+                        </div>
+                        <div id="metricAbsences" class="text-3xl font-extrabold text-slate-900">0 / 2</div>
+                        <p class="text-xs text-slate-500 mt-1">Monthly quota within limits</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Badges</span>
+                            <span class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-award"></i>
+                            </span>
+                        </div>
+                        <div class="text-lg font-bold text-slate-900 truncate">Intermediate Python</div>
+                        <p class="text-xs text-purple-600 font-medium mt-1">Verified by Community</p>
+                    </div>
+
+                </div>
+
+                <!-- MAIN WORKSPACE CONTENT -->
+                <div class="grid lg:grid-cols-3 gap-8">
+                    
+                    <!-- LEFT COLUMN: SESSIONS & MATCHES -->
+                    <div class="lg:col-span-2 space-y-6">
+                        
+                        <!-- UPCOMING SESSIONS -->
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-bold text-slate-900">Upcoming Scheduled Sessions</h3>
+                                <span id="upcomingCount" class="text-xs font-bold bg-brand-50 text-brand-600 px-3 py-1 rounded-full">0 Confirmed</span>
+                            </div>
+
+                            <div id="sessionsList" class="space-y-4">
+                                <p class="text-sm text-slate-500">Log in to see your sessions.</p>
+                            </div>
+                        </div>
+
+                        <!-- RECOMMENDED MATCHES -->
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                            <h3 class="text-lg font-bold text-slate-900 mb-4">Recommended Matches (Algorithmic Pairing)</h3>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                
+                                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="w-10 h-10 rounded-full bg-indigo-200 text-brand-800 flex items-center justify-center font-bold text-sm">
+                                            CB
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold text-sm text-slate-900">Chloe Bernard</h5>
+                                            <p class="text-[11px] text-slate-500">Wants Python • Teaches UI/UX Design</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between text-xs pt-3 border-t border-slate-200">
+                                        <span class="text-emerald-600 font-bold"><i class="fa-solid fa-check-circle"></i> 95% Match</span>
+                                        <button onclick="notify('Exchange invitation sent to Chloe!')" class="text-brand-600 font-bold hover:underline">Propose</button>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="w-10 h-10 rounded-full bg-emerald-200 text-emerald-800 flex items-center justify-center font-bold text-sm">
+                                            MB
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold text-sm text-slate-900">Mehdi Benali</h5>
+                                            <p class="text-[11px] text-slate-500">Wants React • Teaches Data Analysis</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between text-xs pt-3 border-t border-slate-200">
+                                        <span class="text-emerald-600 font-bold"><i class="fa-solid fa-check-circle"></i> 88% Match</span>
+                                        <button onclick="notify('Exchange invitation sent to Mehdi!')" class="text-brand-600 font-bold hover:underline">Propose</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT COLUMN: ONBOARDING & RULES -->
+                    <div class="space-y-6">
+                        
+                        <!-- ONBOARDING STATUS CARD -->
+                        <div class="bg-gradient-to-br from-brand-900 to-indigo-900 rounded-2xl text-white p-6 shadow-xl relative overflow-hidden">
+                            <div class="relative z-10">
+                                <span class="bg-brand-500/30 text-brand-200 text-[10px] uppercase font-bold px-2.5 py-1 rounded-md">
+                                    Monthly Renewal
+                                </span>
+                                <h4 class="font-bold text-lg mt-3 mb-1">Safety & Goals Interview</h4>
+                                <p class="text-xs text-brand-100 mb-4 leading-relaxed">
+                                    Your confirmation interview for next month is scheduled for 11/05/2026.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- AUTHENTICATION MODAL (LOG IN / SIGN UP) -->
+    <div id="authModalOverlay" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 relative overflow-hidden">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 text-white flex items-center justify-center font-bold shadow-md shadow-brand-500/20">
+                        PH
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-slate-900 text-lg block">Peer<span class="text-brand-600">Hub</span></span>
+                        <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-400">Secure Authentication</span>
+                    </div>
+                </div>
+                <button onclick="closeAuthModal()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all font-bold">&times;</button>
+            </div>
+
+            <!-- TAB SWITCHER (Login / Register) -->
+            <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-6 text-xs font-bold text-slate-600">
+                <button id="tabLogin" onclick="switchAuthTab('login')" class="flex-1 py-3 rounded-xl bg-white text-slate-900 shadow-sm transition-all text-center">
+                    <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Log In
+                </button>
+                <button id="tabRegister" onclick="switchAuthTab('register')" class="flex-1 py-3 rounded-xl hover:text-slate-900 transition-all text-center">
+                    <i class="fa-solid fa-user-plus mr-1.5"></i> Register (+18)
+                </button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="formLogin" onsubmit="handleAuthSubmit(event, 'login')" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">University / Professional Email</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
+                        <input id="loginEmail" type="email" required placeholder="name@university.edu" class="w-full pl-10 pr-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/10 transition-all">
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wide">Password</label>
+                        <a href="#" onclick="notify('Password reset link sent to your registered email.')" class="text-[11px] text-brand-600 hover:underline font-semibold">Forgot password?</a>
+                    </div>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input id="loginPassword" type="password" required placeholder="••••••••••••" class="w-full pl-10 pr-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/10 transition-all">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-600/25 transition-all text-sm flex items-center justify-center gap-2">
+                        <span>Authenticate & Access</span> <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <div class="text-center pt-2">
+                    <p class="text-[11px] text-slate-400">Protected by PeerHub Automated Commitment Protocol</p>
+                </div>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="formRegister" onsubmit="handleAuthSubmit(event, 'register')" class="space-y-4 hidden">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">First Name</label>
+                        <input type="text" id="regFirstName" required placeholder="Julian" class="w-full px-3.5 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Last Name</label>
+                        <input type="text" id="regLastName" required placeholder="Dupont" class="w-full px-3.5 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-600">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Institutional Email (+18)</label>
+                    <input id="regEmail" type="email" required placeholder="julian.dupont@university.edu" class="w-full px-3.5 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Primary Skill Expertise</label>
+                    <input type="text" id="regSkill" required maxlength="80" placeholder="e.g. React, Python, UI/UX Design" class="w-full px-3.5 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Secure Password</label>
+                    <input id="regPassword" type="password" required minlength="8" placeholder="At least 8 characters" class="w-full px-3.5 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-600">
+                </div>
+
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
+                    <div class="flex items-start gap-2.5">
+                        <input type="checkbox" required id="checkAge" class="mt-1 rounded border-slate-300 text-brand-600">
+                        <label for="checkAge" class="text-xs text-slate-600 leading-tight">I confirm that I am <strong class="text-slate-900">18 years of age or older</strong> and agree to participate in monthly identity verification.</label>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <input type="checkbox" required id="checkCommitment" class="mt-1 rounded border-slate-300 text-brand-600">
+                        <label for="checkCommitment" class="text-xs text-slate-600 leading-tight">I accept the <strong class="text-slate-900">Zero-Ghosting & Absence Policy</strong>.</label>
+                    </div>
+                </div>
+
+                <div class="pt-1">
+                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-600/25 transition-all text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-shield-check"></i> Submit Application & Register
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ACTION MODAL (PROPOSE SESSION / DECLARE ABSENCE) -->
+    <div id="modalOverlay" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                <h3 id="modalTitle" class="font-extrabold text-slate-900 text-lg"></h3>
+                <button type="button" onclick="closeModal()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all font-bold">&times;</button>
+            </div>
+            <form id="modalForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <div id="modalBody"></div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-600/25 transition-all text-sm">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs font-medium">
+        <i class="fa-solid fa-circle-info text-brand-400 text-base"></i>
+        <span id="toastText">Confirmation message</span>
+    </div>
+
+    <!-- INTERACTIVE JAVASCRIPT -->
+    <script>
+        const SUPABASE_URL = 'https://lhkvquolmpvdzlrgraqr.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_h-5OdOB_mY59GiDdNypnzQ_M0-0mQBo';
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const MONTHLY_ABSENCE_QUOTA = 2;
+
+        // STATE MANAGEMENT
+        let currentUser = null;
+        let currentName = '';
+        let upcomingSessions = [];
+
+        function esc(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatDate(iso) {
+            return new Date(iso).toLocaleString(undefined, {
+                weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+            });
+        }
+
+        // AUTHENTICATION MODAL FUNCTIONS
+        function openAuthModal(mode = 'login') {
+            const overlay = document.getElementById('authModalOverlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            switchAuthTab(mode);
+        }
+
+        function closeAuthModal() {
+            const overlay = document.getElementById('authModalOverlay');
+            overlay.classList.remove('flex');
+            overlay.classList.add('hidden');
+        }
+
+        function switchAuthTab(tab) {
+            const tabLogin = document.getElementById('tabLogin');
+            const tabRegister = document.getElementById('tabRegister');
+            const formLogin = document.getElementById('formLogin');
+            const formRegister = document.getElementById('formRegister');
+
+            if (tab === 'login') {
+                tabLogin.className = "flex-1 py-3 rounded-xl bg-white text-slate-900 shadow-sm transition-all text-center";
+                tabRegister.className = "flex-1 py-3 rounded-xl hover:text-slate-900 transition-all text-center";
+                formLogin.classList.remove('hidden');
+                formRegister.classList.add('hidden');
+            } else {
+                tabRegister.className = "flex-1 py-3 rounded-xl bg-white text-slate-900 shadow-sm transition-all text-center";
+                tabLogin.className = "flex-1 py-3 rounded-xl hover:text-slate-900 transition-all text-center";
+                formRegister.classList.remove('hidden');
+                formLogin.classList.add('hidden');
+            }
+        }
+
+        async function handleAuthSubmit(e, type) {
+            e.preventDefault();
+            try {
+                if (type === 'login') {
+                    const email = document.getElementById('loginEmail').value.trim();
+                    const password = document.getElementById('loginPassword').value;
+                    const { error } = await db.auth.signInWithPassword({ email, password });
+                    if (error) {
+                        notify('Sign-in failed. Check your email and password.');
+                        return;
+                    }
+                    closeAuthModal();
+                    notify('Authentication successful. Welcome back to PeerHub.');
+                    return;
+                }
+
+                const firstName = document.getElementById('regFirstName').value.trim();
+                const lastName = document.getElementById('regLastName').value.trim();
+                const email = document.getElementById('regEmail').value.trim();
+                const skill = document.getElementById('regSkill').value.trim();
+                const password = document.getElementById('regPassword').value;
+
+                const fullName = `${firstName} ${lastName}`.trim();
+                if (fullName.length > 80) {
+                    notify('Your full name is too long (max 80 characters).');
+                    return;
+                }
+                if (skill.length > 80) {
+                    notify('Your skill entry is too long (max 80 characters).');
+                    return;
+                }
+
+                const { data, error } = await db.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            display_name: fullName.slice(0, 80)
+                        }
+                    }
+                });
+                if (error) {
+                    notify(`Registration failed: ${error.message}`);
+                    return;
+                }
+
+                if (!data.session) {
+                    closeAuthModal();
+                    notify('Application received. Check your email to confirm your account.');
+                    return;
+                }
+
+                if (skill) {
+                    const { error: skillError } = await db.from('skills').insert({ name: skill, category: 'General', level: 1 });
+                    if (skillError) {
+                        notify('Your account was created, but your skill could not be saved.');
+                    }
+                }
+                closeAuthModal();
+                notify(`Application received! Welcome to PeerHub, ${firstName}.`);
+            } catch (err) {
+                notify('Something went wrong during authentication. Please try again.');
+            }
+        }
+
+        async function logout() {
+            try {
+                const { error } = await db.auth.signOut();
+                if (error) {
+                    notify('Could not sign out. Please try again.');
+                    return;
+                }
+                notify('Successfully signed out of PeerHub.');
+                switchView('landing');
+            } catch (err) {
+                notify('Could not sign out. Please try again.');
+            }
+        }
+
+        function updateAuthUI() {
+            const authContainer = document.getElementById('authNavContainer');
+            if (currentUser) {
+                authContainer.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="text-right hidden sm:block">
+                            <span class="block text-xs font-bold text-slate-900">${esc(currentName)}</span>
+                            <span class="block text-[10px] text-emerald-600 font-semibold"><i class="fa-solid fa-circle text-[8px]"></i> Verified Active</span>
+                        </div>
+                        <button onclick="logout()" title="Log Out" class="bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 p-2.5 rounded-xl border border-slate-200 transition-all">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                authContainer.innerHTML = `
+                    <button id="btnAuth" onclick="openAuthModal('login')" class="bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-md shadow-brand-600/20 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> <span>Log In</span>
+                    </button>
+                `;
+            }
+        }
+
+        // SESSION & PROFILE LOADING
+        async function applySession(session) {
+            currentUser = session ? session.user : null;
+            currentName = '';
+
+            try {
+                if (currentUser) {
+                    const { data, error } = await db
+                        .from('profiles')
+                        .select('display_name')
+                        .eq('id', currentUser.id)
+                        .maybeSingle();
+                    if (error) notify('Could not load your profile.');
+                    currentName = data?.display_name || currentUser.email;
+                }
+            } catch (err) {
+                notify('Could not load your profile.');
+            }
+
+            updateAuthUI();
+            document.getElementById('dashboardTitle').textContent = currentName ? `${currentName}'s Dashboard` : 'Your Dashboard';
+
+            if (currentUser) {
+                await loadDashboard();
+            } else {
+                upcomingSessions = [];
+                if (!document.getElementById('viewDashboard').classList.contains('hidden')) switchView('landing');
+            }
+        }
+
+        db.auth.onAuthStateChange((_event, session) => {
+            setTimeout(() => applySession(session), 0);
+        });
+
+        async function loadDashboard() {
+            const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+
+            let completedRes, absencesRes, upcomingRes;
+            try {
+                [completedRes, absencesRes, upcomingRes] = await Promise.all([
+                    db.from('sessions').select('duration_minutes, role').eq('status', 'completed'),
+                    db.from('excuses').select('id').gte('created_at', monthStart),
+                    db.from('sessions')
+                        .select('id, title, role, scheduled_at, duration_minutes')
+                        .eq('status', 'scheduled')
+                        .gte('scheduled_at', new Date().toISOString())
+                        .order('scheduled_at', { ascending: true })
+                        .limit(10),
+                ]);
+            } catch (err) {
+                notify('Could not load your dashboard. Please refresh the page.');
+                return;
+            }
+
+            if (completedRes.error || absencesRes.error || upcomingRes.error) {
+                notify('Could not load your dashboard. Please refresh the page.');
+                return;
+            }
+
+            const minutesFor = (role) => completedRes.data
+                .filter((s) => s.role === role)
+                .reduce((sum, s) => sum + s.duration_minutes, 0);
+            const totalMinutes = minutesFor('teach') + minutesFor('learn');
+            document.getElementById('metricHours').textContent = `${Math.round(totalMinutes / 60)} hrs`;
+            document.getElementById('metricSplit').textContent =
+                `${Math.round(minutesFor('teach') / 60)}h Mentor / ${Math.round(minutesFor('learn') / 60)}h Learner`;
+            document.getElementById('metricAbsences').textContent = `${absencesRes.data.length} / ${MONTHLY_ABSENCE_QUOTA}`;
+
+            upcomingSessions = upcomingRes.data;
+            document.getElementById('upcomingCount').textContent = `${upcomingSessions.length} Confirmed`;
+            renderUpcomingSessions();
+        }
+
+        function renderUpcomingSessions() {
+            const container = document.getElementById('sessionsList');
+            if (upcomingSessions.length === 0) {
+                container.innerHTML = `<p class="text-sm text-slate-500">No upcoming sessions yet. Use Propose Session to book one.</p>`;
+                return;
+            }
+            container.innerHTML = upcomingSessions.map((s) => `
+                <div class="p-4 rounded-xl border border-slate-200 hover:border-brand-300 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50/50">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xl shrink-0">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900">${esc(s.title)}</h4>
+                            <p class="text-xs text-slate-500">${s.role === 'teach' ? 'You are teaching' : 'You are learning'} • ${s.duration_minutes} min</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between">
+                        <div class="text-right">
+                            <div class="text-xs font-bold text-slate-800">${esc(formatDate(s.scheduled_at))}</div>
+                            <div class="text-[10px] text-slate-400">Scheduled</div>
+                        </div>
+                        <button onclick="openModal('absence')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
+                            Report Absence
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // VIEW SWITCHER
+        function switchView(view) {
+            if (view === 'dashboard' && !currentUser) {
+                notify('Please log in to open your dashboard.');
+                openAuthModal('login');
+                return;
+            }
+
+            const landing = document.getElementById('viewLanding');
+            const dashboard = document.getElementById('viewDashboard');
+            const btnLanding = document.getElementById('btnNavLanding');
+            const btnDashboard = document.getElementById('btnNavDashboard');
+
+            if (view === 'landing') {
+                landing.classList.remove('hidden');
+                dashboard.classList.add('hidden');
+                btnLanding.className = "px-4 py-2 text-sm font-bold text-brand-600 border-b-2 border-brand-600 transition-all";
+                btnDashboard.className = "bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold px-4 py-2 rounded-xl transition-all flex items-center gap-2";
+            } else {
+                landing.classList.add('hidden');
+                dashboard.classList.remove('hidden');
+                btnLanding.className = "px-4 py-2 text-sm font-semibold text-slate-600 hover:text-brand-600 transition-all";
+                btnDashboard.className = "bg-brand-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2";
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // NOTIFICATION SYSTEM
+        function notify(msg) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toastText');
+            toastText.textContent = msg;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        // MODAL MANAGEMENT
+        let currentModalType = '';
+
+        function openModal(type) {
+            if (!currentUser) {
+                notify('Please log in first.');
+                openAuthModal('login');
+                return;
+            }
+            currentModalType = type;
+            const overlay = document.getElementById('modalOverlay');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+
+            if (type === 'session') {
+                title.textContent = "Propose New Session";
+                body.innerHTML = `
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Skill Topic</label>
+                            <input id="sessionTopic" type="text" required maxlength="120" placeholder="e.g. Python, UI Design, English..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-600">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Date</label>
+                                <input id="sessionDate" type="date" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-600">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Time</label>
+                                <input id="sessionTime" type="time" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-600">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Duration</label>
+                            <select id="sessionDuration" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none focus:border-brand-600">
+                                <option value="45">45 minutes (Practical Session)</option>
+                                <option value="60">60 minutes (Deep Dive Workshop)</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'absence') {
+                title.textContent = "Declare Official Absence";
+                const options = upcomingSessions.map((s) =>
+                    `<option value="${esc(s.id)}">${esc(s.title)} - ${esc(formatDate(s.scheduled_at))}</option>`
+                ).join('');
+                body.innerHTML = `
+                    <div class="space-y-3">
+                        <p class="text-xs text-slate-500">Under PeerHub rules, absences notified at least 24h in advance will not impact your engagement score.</p>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Affected Session</label>
+                            <select id="excuseSession" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none focus:border-brand-600">
+                                ${options || '<option value="">No upcoming sessions</option>'}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Reason (Confidential)</label>
+                            <input id="excuseReason" type="text" required maxlength="500" placeholder="e.g. Academic exams, Medical reason..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-600">
+                        </div>
+                    </div>
+                `;
+            }
+
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        }
+
+        function closeModal() {
+            const overlay = document.getElementById('modalOverlay');
+            overlay.classList.remove('flex');
+            overlay.classList.add('hidden');
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            try {
+
+            if (currentModalType === 'session') {
+                const topic = document.getElementById('sessionTopic').value.trim();
+                const date = document.getElementById('sessionDate').value;
+                const time = document.getElementById('sessionTime').value;
+                const duration = Number(document.getElementById('sessionDuration').value);
+                const scheduledAt = new Date(`${date}T${time}`);
+                if (!topic || isNaN(scheduledAt)) {
+                    notify('Please enter a topic, date and time.');
+                    return;
+                }
+
+                const { error } = await db.from('sessions').insert({
+                    title: topic,
+                    role: 'learn',
+                    scheduled_at: scheduledAt.toISOString(),
+                    duration_minutes: duration,
+                });
+                if (error) {
+                    notify('Could not publish your session. Please try again.');
+                    return;
+                }
+                closeModal();
+                notify('Your session proposal has been published!');
+                await loadDashboard();
+                return;
+            }
+
+            if (currentModalType === 'absence') {
+                const sessionId = document.getElementById('excuseSession')?.value;
+                const reason = document.getElementById('excuseReason')?.value.trim();
+                if (!sessionId || !reason) {
+                    notify('Please choose a session and give a reason.');
+                    return;
+                }
+
+                const { error } = await db.from('excuses').insert({ session_id: sessionId, reason });
+                if (error) {
+                    notify(error.code === '23505'
+                        ? 'You have already declared an absence for this session.'
+                        : 'Could not register your absence. Please try again.');
+                    return;
+                }
+                closeModal();
+                notify('Absence registered officially without penalty.');
+                await loadDashboard();
+            }
+            } catch (err) {
+                notify('Something went wrong. Please try again.');
+            }
+        }
+
+    </script>
+</body>
+</html>
